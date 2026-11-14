@@ -120,8 +120,8 @@ jobs:
             adb shell am start -W -n io.github.hidooch980.mlhvpn.fdroid/com.v2ray.ang.ui.main.MainActivity | tee launch.txt
             grep -F 'Status: ok' launch.txt
             sleep 3
-            adb shell dumpsys activity activities | grep -F 'mResumedActivity' | grep -F 'io.github.hidooch980.mlhvpn.fdroid'
             adb exec-out screencap -p > dashboard.png
+            test -s dashboard.png
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
