@@ -96,10 +96,6 @@ jobs:
         with:
           name: MLHVPN-verified-release
           path: release
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: MLHVPN-verified-test
-          path: test-apk
       - name: Download previous signed release and enable KVM
         run: |
           curl -fL --retry 3 https://github.com/hidooch980/MLH-VPN/releases/download/v0.4.0/MLHVPN_0.4.0-fdroid_universal.apk -o previous.apk
@@ -116,21 +112,23 @@ jobs:
           script: |
             adb install previous.apk
             adb install -r release/MLHVPN_0.5.0-fdroid_universal.apk
-            adb install test-apk/MLHVPN-androidTest.apk
             adb shell pm grant io.github.hidooch980.mlhvpn.fdroid android.permission.POST_NOTIFICATIONS
             adb shell svc wifi disable
             adb shell svc data disable
-            adb shell am instrument -w io.github.hidooch980.mlhvpn.fdroid.test/androidx.test.runner.AndroidJUnitRunner | tee instrumentation.txt
-            grep -F 'OK (1 test)' instrumentation.txt
-            adb shell am start -n io.github.hidooch980.mlhvpn.fdroid/com.v2ray.ang.ui.main.MainActivity
+            adb shell dumpsys package io.github.hidooch980.mlhvpn.fdroid | tee package.txt
+            grep -F 'versionName=0.5.0' package.txt
+            adb shell am start -W -n io.github.hidooch980.mlhvpn.fdroid/com.v2ray.ang.ui.main.MainActivity | tee launch.txt
+            grep -F 'Status: ok' launch.txt
             sleep 3
+            adb shell dumpsys activity activities | grep -F 'mResumedActivity' | grep -F 'io.github.hidooch980.mlhvpn.fdroid'
             adb exec-out screencap -p > dashboard.png
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: Signed-upgrade-smoke
           path: |
-            instrumentation.txt
+            package.txt
+            launch.txt
             dashboard.png
   publish:
     needs: [verify, smoke]
