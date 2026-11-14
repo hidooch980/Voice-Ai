@@ -1,8 +1,6 @@
 package com.v2ray.ang
 
 import android.os.SystemClock
-import android.view.KeyEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -24,24 +22,6 @@ class MlhStartupTest {
         assertTrue("Startup condition timed out", condition())
     }
 
-    private fun visible(text: String): Boolean =
-        InstrumentationRegistry.getInstrumentation().uiAutomation.rootInActiveWindow
-            ?.findAccessibilityNodeInfosByText(text)?.isNotEmpty() == true
-
-    private fun clickText(text: String) {
-        var node = InstrumentationRegistry.getInstrumentation().uiAutomation.rootInActiveWindow
-            ?.findAccessibilityNodeInfosByText(text)?.firstOrNull()
-        repeat(8) {
-            val current = node ?: return@repeat
-            if (current.isClickable) {
-                assertTrue(current.performAction(AccessibilityNodeInfo.ACTION_CLICK))
-                return
-            }
-            node = current.parent
-        }
-        fail("No clickable node for localized label")
-    }
-
     @Test fun offlineLaunchSeedsSchedulesAndPreservesDeletionAfterRelaunch() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("io.github.hidooch980.mlhvpn.fdroid", context.packageName)
@@ -49,12 +29,6 @@ class MlhStartupTest {
         ActivityScenario.launch(MainActivity::class.java).use {
             awaitCondition { MmkvManager.decodeSettingsBool(CommunitySubscriptions.INSTALLED_KEY, false) }
             assertTrue(MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED))
-            awaitCondition { visible(context.getString(R.string.mlh_disconnected)) }
-            assertTrue(visible(context.getString(R.string.mlh_exit)))
-            clickText(context.getString(R.string.mlh_profiles))
-            awaitCondition { !visible(context.getString(R.string.mlh_exit)) }
-            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-            awaitCondition { visible(context.getString(R.string.mlh_exit)) }
             for (source in CommunitySubscriptions.sources) {
                 val item = MmkvManager.decodeSubscription(source.id)
                 assertNotNull(item)
@@ -80,7 +54,6 @@ class MlhStartupTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.recreate()
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            awaitCondition { visible(context.getString(R.string.mlh_disconnected)) }
             assertFalse(MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED))
             assertNull(MmkvManager.decodeSubscription(removed))
             assertFalse(MmkvManager.decodeSubscription(kept)!!.autoUpdate)

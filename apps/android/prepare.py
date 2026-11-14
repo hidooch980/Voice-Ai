@@ -95,7 +95,19 @@ def prepare(root: Path) -> None:
                                 lambda match: match[1] + label + match[2], content)
         if count != 1:
             raise ValueError(f'Missing WARP menu resource in {locale}')
+        # Keep upstream attribution in licenses, while removing upstream product
+        # branding from every user-visible locale.
+        content = content.replace('v2rayNG', 'MLH VPN')
         changes[path] = content
+
+    path = project / 'app/src/main/java/com/v2ray/ang/util/HttpUtil.kt'
+    changes[path] = replace_once(path.read_text(),
+        '"v2rayNG/${BuildConfig.VERSION_NAME}"',
+        '"MLHVPN/${BuildConfig.VERSION_NAME}"')
+    path = project / 'app/src/main/java/com/v2ray/ang/ui/logcat/LogcatActivity.kt'
+    changes[path] = replace_once(path.read_text(),
+        '"v2rayNG_logcat_$timestamp.txt"',
+        '"MLHVPN_logcat_$timestamp.txt"')
 
     # Provider-exported WireGuard files can begin with comments (e.g. Proton).
     path = project / 'app/src/main/java/com/v2ray/ang/handler/AngConfigManager.kt'

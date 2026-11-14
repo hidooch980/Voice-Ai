@@ -1,17 +1,16 @@
 name: Verify and publish signed Android
 on:
   push:
-    branches: ['codex/android-0.5']
-    paths: ['release-signatures/0.5.0/**', '.github/workflows/android-publish.yml']
+    branches: ['main']
+    paths: ['release-signatures/0.5.1/**', '.github/workflows/android-publish.yml']
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: mlh-publish-0.5.0
+  group: mlh-publish-0.5.1
   cancel-in-progress: false
 jobs:
   verify:
-    if: startsWith(github.event.head_commit.message, 'publish:')
     runs-on: ubuntu-latest
     outputs:
       source: ${{ steps.manifest.outputs.source }}
@@ -24,7 +23,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, re, os, subprocess
-          m = json.load(open('release-signatures/0.5.0/manifest.json'))
+          m = json.load(open('release-signatures/0.5.1/manifest.json'))
           assert isinstance(m['run_id'], int) and m['run_id'] > 0
           assert re.fullmatch('[a-f0-9]{40}', m['source_sha'])
           run = json.loads(subprocess.check_output(['gh', 'api', f'repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{m["run_id"]}']))
@@ -62,7 +61,7 @@ jobs:
             name=$(basename "$apk")
             target="dist/$name"
             if [ "$name" = MLHVPN-androidTest.apk ]; then target="test-apk/$name"; fi
-            python3 apps/android/apk_signature_patch.py apply "$apk" "release-signatures/0.5.0/$name.json" "$target"
+            python3 apps/android/apk_signature_patch.py apply "$apk" "release-signatures/0.5.1/$name.json" "$target"
             "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$target" > "$RUNNER_TEMP/signature.txt"
             grep -F 'certificate SHA-256 digest: 3c8849fc59084133e7b09402ee1665563f5329ce3602380a7e05faee8d4e7d7d' "$RUNNER_TEMP/signature.txt"
             "$ANDROID_HOME/build-tools/37.0.0/zipalign" -c -P 16 4 "$target"
@@ -76,7 +75,7 @@ jobs:
           done
           cp source/MLHVPN-android-source.tar.gz dist/
           cp apps/android/RELEASE-NOTES.fa.md apps/android/INSTALL.fa.md dist/
-          cp release-signatures/0.5.0/MLHVPN-signing-cert.pem dist/
+          cp release-signatures/0.5.1/MLHVPN-signing-cert.pem dist/
           cd dist
           sha256sum *.apk *.pem *.tar.gz > SHA256SUMS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -111,12 +110,12 @@ jobs:
           disable-animations: true
           script: |
             adb install previous.apk
-            adb install -r release/MLHVPN_0.5.0-fdroid_universal.apk
+            adb install -r release/MLHVPN_0.5.1-fdroid_universal.apk
             adb shell pm grant io.github.hidooch980.mlhvpn.fdroid android.permission.POST_NOTIFICATIONS
             adb shell svc wifi disable
             adb shell svc data disable
             adb shell dumpsys package io.github.hidooch980.mlhvpn.fdroid | tee package.txt
-            grep -F 'versionName=0.5.0' package.txt
+            grep -F 'versionName=0.5.1' package.txt
             adb shell am start -W -n io.github.hidooch980.mlhvpn.fdroid/com.v2ray.ang.ui.main.MainActivity | tee launch.txt
             grep -F 'Status: ok' launch.txt
             sleep 3
@@ -147,4 +146,4 @@ jobs:
         run: |
           cd release
           sha256sum -c SHA256SUMS
-          gh release create v0.5.0 --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title 'MLH VPN 0.5.0' --notes-file RELEASE-NOTES.fa.md ./*.apk ./MLHVPN-signing-cert.pem ./MLHVPN-android-source.tar.gz ./SHA256SUMS ./INSTALL.fa.md
+          gh release create v0.5.1 --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title 'MLH VPN 0.5.1' --notes-file RELEASE-NOTES.fa.md ./*.apk ./MLHVPN-signing-cert.pem ./MLHVPN-android-source.tar.gz ./SHA256SUMS ./INSTALL.fa.md

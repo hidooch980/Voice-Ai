@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 
 class ReleaseAssetSelectorTest {
     private fun asset(abi: String): GitHubRelease.Asset {
-        val name = "MLHVPN_0.5.0-fdroid_${abi}.apk"
-        return GitHubRelease.Asset(name, "https://github.com/hidooch980/MLH-VPN/releases/download/v0.5.0/$name")
+        val name = "MLHVPN_0.5.1-fdroid_${abi}.apk"
+        return GitHubRelease.Asset(name, "https://github.com/hidooch980/MLH-VPN/releases/download/v0.5.1/$name")
     }
-    private fun release(vararg assets: GitHubRelease.Asset) = GitHubRelease("v0.5.0", "", assets.toList())
+    private fun release(vararg assets: GitHubRelease.Asset) = GitHubRelease("v0.5.1", "", assets.toList())
 
     @Test fun `daily checks handle first launch recent attempts and clock rollback`() {
         assertTrue(ReleaseAssetSelector.shouldCheck(1000, 0))
