@@ -94,7 +94,7 @@ jobs:
           target: google_apis
           disable-animations: true
           script: |
-            adb install preview/MLHVPN_0.4.0-fdroid_x86_64.apk
+            adb install preview/MLHVPN_*-fdroid_x86_64.apk
             adb install preview/MLHVPN-androidTest.apk
             adb shell pm grant io.github.hidooch980.mlhvpn.fdroid android.permission.POST_NOTIFICATIONS
             adb shell svc wifi disable

@@ -1,5 +1,11 @@
     /** Called by MainRepository from the ViewModel-owned IO initialization job. */
     fun ensureCommunitySubscriptions() {
+        // Different fallback results mean this setting has never been stored.
+        // Enable telemetry on first install, preserving any explicit choice on upgrade.
+        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED, true) !=
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED, false)) {
+            MmkvManager.encodeSettings(AppConfig.PREF_SPEED_ENABLED, true)
+        }
         CommunitySubscriptions.installOnce(object : CommunitySubscriptions.Store {
             override fun isInstalled() = MmkvManager.decodeSettingsBool(CommunitySubscriptions.INSTALLED_KEY, false)
             override fun isLegacyInstalled() = MmkvManager.decodeSettingsBool(CommunitySubscriptions.LEGACY_INSTALLED_KEY, false)

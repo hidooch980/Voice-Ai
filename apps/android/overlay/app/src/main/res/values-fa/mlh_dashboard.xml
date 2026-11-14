@@ -1,0 +1,19 @@
+<resources>
+    <string name="mlh_connection">اتصال</string>
+    <string name="mlh_connected">متصل</string>
+    <string name="mlh_disconnected">قطع</string>
+    <string name="mlh_exit">مکان خروجی</string>
+    <string name="mlh_unknown">نامشخص</string>
+    <string name="mlh_timer">زمان اتصال</string>
+    <string name="mlh_ping">پینگ</string>
+    <string name="mlh_send">ارسال</string>
+    <string name="mlh_receive">دریافت</string>
+    <string name="mlh_sent_total">کل ارسال</string>
+    <string name="mlh_received_total">کل دریافت</string>
+    <string name="mlh_profiles">کانفیگ‌ها</string>
+    <string name="mlh_probe">بررسی خروجی و پینگ</string>
+    <string name="mlh_connect">اتصال</string>
+    <string name="mlh_disconnect">قطع اتصال</string>
+    <string name="mlh_unavailable">—</string>
+    <string name="mlh_connecting">در حال اتصال…</string>
+</resources>

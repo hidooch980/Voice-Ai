@@ -48,6 +48,12 @@ class OverlayTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'native core'):
                 prepare.download_core(Path('/unused'))
 
+    def test_visible_branding_uses_mlh_name(self):
+        source = '<string name="app_name">v2rayNG</string><string>v2rayNG service</string>'
+        branded = source.replace('v2rayNG', 'MLH VPN')
+        self.assertNotIn('v2rayNG', branded)
+        self.assertEqual(branded.count('MLH VPN'), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

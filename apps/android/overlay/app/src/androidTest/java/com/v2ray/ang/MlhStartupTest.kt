@@ -28,6 +28,7 @@ class MlhStartupTest {
         assertEquals("MLH VPN", context.getString(R.string.app_name))
         ActivityScenario.launch(MainActivity::class.java).use {
             awaitCondition { MmkvManager.decodeSettingsBool(CommunitySubscriptions.INSTALLED_KEY, false) }
+            assertTrue(MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED))
             for (source in CommunitySubscriptions.sources) {
                 val item = MmkvManager.decodeSubscription(source.id)
                 assertNotNull(item)
@@ -41,6 +42,7 @@ class MlhStartupTest {
                     .get(5, TimeUnit.SECONDS).count { work -> !work.state.isFinished } >= CommunitySubscriptions.sources.size
             }
         }
+        MmkvManager.encodeSettings(AppConfig.PREF_SPEED_ENABLED, false)
         val removed = CommunitySubscriptions.sources.first().id
         MmkvManager.removeSubscription(removed)
         SubscriptionUpdater.cancelOne(context, removed)
@@ -52,6 +54,7 @@ class MlhStartupTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.recreate()
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            assertFalse(MmkvManager.decodeSettingsBool(AppConfig.PREF_SPEED_ENABLED))
             assertNull(MmkvManager.decodeSubscription(removed))
             assertFalse(MmkvManager.decodeSubscription(kept)!!.autoUpdate)
         }

@@ -1,0 +1,58 @@
+name: Android release candidate
+on:
+  push:
+    branches: ['codex/android-0.5']
+    paths: ['apps/android/**', '.github/workflows/android-candidate.yml']
+permissions:
+  contents: read
+concurrency:
+  group: mlh-android-candidate
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Test overlay and fetch pinned upstream
+        run: |
+          python3 -m unittest discover -s apps/android/tests -v
+          mkdir -p work
+          git clone --no-checkout https://github.com/2dust/v2rayNG.git work/android
+          REVISION=$(python3 -c 'import json; print(json.load(open("apps/android/upstream.lock.json"))["commit"])')
+          git -C work/android checkout --detach "$REVISION"
+          git -C work/android submodule update --init --recursive
+          python3 apps/android/prepare.py work/android
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          cmdline-tools-version: '14742923'
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools ndk;30.0.16248370'
+          log-accepted-android-sdk-licenses: false
+      - name: Build release and regression tests
+        run: bash apps/android/build.sh "$PWD/work/android" release
+      - name: Prepare three aligned release packages and test APK
+        run: |
+          bash apps/android/prepare_unsigned.sh "$PWD/work/android"
+          mkdir -p source
+          tar --exclude=.git --exclude=.gradle --exclude=build --exclude=libs --exclude=local.properties -czf source/MLHVPN-android-source.tar.gz apps/android work/android
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: MLHVPN-unsigned
+          path: unsigned/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: MLHVPN-source
+          path: source/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: Candidate-test-results
+          path: work/android/V2rayNG/app/build/reports/tests/
+          if-no-files-found: ignore

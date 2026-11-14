@@ -1,0 +1,19 @@
+<resources>
+    <string name="mlh_connection">Connection</string>
+    <string name="mlh_connected">Connected</string>
+    <string name="mlh_disconnected">Disconnected</string>
+    <string name="mlh_exit">Exit location</string>
+    <string name="mlh_unknown">Unknown</string>
+    <string name="mlh_timer">Session time</string>
+    <string name="mlh_ping">Ping</string>
+    <string name="mlh_send">Send</string>
+    <string name="mlh_receive">Receive</string>
+    <string name="mlh_sent_total">Total sent</string>
+    <string name="mlh_received_total">Total received</string>
+    <string name="mlh_profiles">Configurations</string>
+    <string name="mlh_probe">Check exit and ping</string>
+    <string name="mlh_connect">Connect</string>
+    <string name="mlh_disconnect">Disconnect</string>
+    <string name="mlh_unavailable">—</string>
+    <string name="mlh_connecting">Connecting…</string>
+</resources>
